@@ -3,19 +3,19 @@
 CREATE TABLE Invoicings (
     año int(4),
     mes int(2),
-    tipo_comprobante varchar(4),
-    secuencia_comprobante varchar(10),
-    fecha_documento date,
-    operacion varchar(50),
-    puc_codigo_cuenta int(8),
-    centro_costo varchar(3),
-    punto_operacion int(1),
-    tercero int(12),
-    puc_nombre varchar(50),
-    impuesto int,
+    tipo_comprobante varchar(255),
+    secuencia_comprobante varchar(255),
+    fecha_documento varchar(255),
+    operacion varchar(255),
+    puc_codigo_cuenta varchar(255),
+    centro_costo varchar(255),
+    punto_operacion varchar(255),
+    tercero varchar(255),
+    puc_nombre varchar(255),
+    impuesto varchar(255),
     cheque varchar(255),
-    debito float,
-    credito float
+    debito VARCHAR(255),
+    credito VARCHAR(255)
 )
 -- +goose StatementEnd
 

@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// SetupRoutes configura las rutas de la aplicación
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/api")
 

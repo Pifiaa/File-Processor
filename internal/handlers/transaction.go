@@ -1,12 +1,23 @@
 package handlers
 
 import (
+	"File-Processor/internal/models"
 	"File-Processor/pkg/utilities"
+	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+)
+
+const (
+	// Número de workers para procesamiento de gouroutines
+	numWorkers int = 10
+
+	// Tamaño del lote para procesamiento
+	batchSize int = 150
 )
 
 func GetTransactions(db *gorm.DB, c *fiber.Ctx) error {
@@ -20,30 +31,24 @@ func GetTransactions(db *gorm.DB, c *fiber.Ctx) error {
 		log.Fatal(err)
 	}
 
-	fmt.Print(fileContent)
-
-	//transactions := utilities.Decode_json(fileContent)
-
-	/*// Iniciar el contador
-	startTime := time.Now()
-
-	// Abrir el archivo JSON
-	FormFile, err := c.FormFile("file")
-	file, err := FormFile.Open()
+	var transactions []models.Invoicings
+	err = json.Unmarshal(fileContent, &transactions)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 
-	// Decodificar el archivo JSON
-	var transactions []Transaction
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&transactions); err != nil {
-		log.Fatal(err)
-	}
+	processTransactions(transactions, db)
 
-	// Procesar el lote de transacciones en goroutines
+	fmt.Print("Hola mundo")
+
+	return nil
+}
+
+func processTransactions(transactions []models.Invoicings, db *gorm.DB) {
 	var wg sync.WaitGroup
+	errChan := make(chan error)
+	stopChan := make(chan struct{}) // Canal para detener la ejecución de goroutines
+
 	for i := 0; i < len(transactions); i += batchSize {
 		end := i + batchSize
 		if end > len(transactions) {
@@ -55,22 +60,38 @@ func GetTransactions(db *gorm.DB, c *fiber.Ctx) error {
 			defer wg.Done()
 			for j := start; j < end; j++ {
 				// Procesar la transacción
-				// transaction := transactions[j]
+				transaction := transactions[j]
 				// log.Printf("\n\nTransacción: %+v\n", transaction)
 
+				if err := db.Create(&transaction).Error; err != nil {
+					log.Printf("Error al insertar la transacción en la base de datos: %v", err)
+					errChan <- err
+					// Enviar señal para detener otras goroutines
+					stopChan <- struct{}{}
+					return
+				}
 				//TODO: Operación sobre los datos
 			}
 		}(i, end)
 	}
-	wg.Wait()
 
-	// Calcula el tiempo transcurrido
-	elapsedTime := time.Since(startTime)
-	log.Printf("Tiempo transcurrido: %v", elapsedTime)
+	// Monitorear errores
+	go func() {
+		for err := range errChan {
+			// Manejar el error como desees
+			log.Printf("Error encontrado: %v", err)
+		}
+		// Cerrar el canal de detención cuando no hay más errores
+		close(stopChan)
+	}()
 
-	return nil*/
+	go func() {
+		// Esperar a que todas las goroutines terminen
+		wg.Wait()
+		// Cerrar el canal de errores después de que todas las goroutines terminen
+		close(errChan)
+	}()
 
-	fmt.Print("Hola mundo")
-
-	return nil
+	// Esperar hasta que se cierre el canal de detención
+	<-stopChan
 }

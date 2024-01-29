@@ -1,4 +1,4 @@
-# AYNN-INVOICINGS-UPLOAD
+# FILE-PROCESSOR-UPLOAD
 
 ---
 - Tabla de contenidos 
@@ -30,7 +30,7 @@
 ## Inicializar la aplicación localmente
 1. Clonar el repositorio
     ```bash
-    git clone https://github.com/Pifiaa/file-upload.git
+    git clone https://github.com/Pifiaa/File-Processor.git
     ```
 
 3. Ejecutar el siguiente comando para descargar todas las depedencias

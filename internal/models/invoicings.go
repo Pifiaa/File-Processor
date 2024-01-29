@@ -1,7 +1,7 @@
 package models
 
 // Representacion de las transacciónes
-type Transaction struct {
+type Invoicings struct {
 	Año                  string `json:"año"`
 	Mes                  string `json:"mes"`
 	TipoComprobante      string `json:"tipo_comprobante"`
