@@ -10,6 +10,9 @@ import (
 func File_reader(file *multipart.FileHeader) ([]byte, error) {
 	// Abrir el archivo
 	fileContent, err := file.Open()
+
+	//TODO: Validar tipo de archivo
+
 	if err != nil {
 		log.Fatal(err)
 	}

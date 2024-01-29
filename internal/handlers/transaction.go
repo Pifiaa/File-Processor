@@ -39,8 +39,6 @@ func GetTransactions(db *gorm.DB, c *fiber.Ctx) error {
 
 	processTransactions(transactions, db)
 
-	fmt.Print("Hola mundo")
-
 	return nil
 }
 
@@ -59,9 +57,7 @@ func processTransactions(transactions []models.Invoicings, db *gorm.DB) {
 		go func(start, end int) {
 			defer wg.Done()
 			for j := start; j < end; j++ {
-				// Procesar la transacción
 				transaction := transactions[j]
-				// log.Printf("\n\nTransacción: %+v\n", transaction)
 
 				if err := db.Create(&transaction).Error; err != nil {
 					log.Printf("Error al insertar la transacción en la base de datos: %v", err)
@@ -71,9 +67,13 @@ func processTransactions(transactions []models.Invoicings, db *gorm.DB) {
 					return
 				}
 				//TODO: Operación sobre los datos
+				//TODO: Enviar datos a la api de konecta
 			}
 		}(i, end)
 	}
+
+	//TODO: Mensaje de aviso
+	fmt.Print("Transacciones procesadas")
 
 	// Monitorear errores
 	go func() {

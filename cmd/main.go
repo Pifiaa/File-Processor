@@ -15,6 +15,6 @@ func main() {
 
 	// Crear una nueva instancia de la aplicación y la inicializa
 	app.Initialize(config)
-}
 
-//https://github.com/mingrammer/go-todo-rest-api-example/blob/master/app/app.go#L22
+	//TODO: Documentación del programa y la api
+}

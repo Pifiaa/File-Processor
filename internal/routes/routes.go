@@ -11,6 +11,8 @@ import (
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/api")
 
+	//TODO:Middleware de autenticación
+
 	api.Route("/upload", func(router fiber.Router) {
 		router.Post("/", func(c *fiber.Ctx) error {
 			return handlers.GetTransactions(db, c)
