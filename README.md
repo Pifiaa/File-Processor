@@ -45,7 +45,7 @@ API construida con el objetivo de recibir archivos, leer su contenido y procesar
 
 Existen varias formas de ejecutar el programa:
 
-#### Go build
+##### 1. Go build
 
 Go build es una herramienta de línea de comandos utilizada para compilar programas Go. Compila un archivo de código fuente Go y crea un archivo binario ejecutable.
 
@@ -69,7 +69,7 @@ make build-linux: construye un ejecutable para Linux
 make build-windows: construye un ejecutable para Windows
 ```
 
-#### Go run
+##### 2. Go run
 
 La herramienta de ejecución Go es una utilidad integrada en la línea de comandos que permite compilar y ejecutar código Go de forma rápida y sencilla, sin la necesidad de crear un ejecutable.
 
