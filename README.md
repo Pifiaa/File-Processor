@@ -9,6 +9,7 @@
 ---
 
 ## Descripción
+API construida con el objetivo de recibir archivos, leer su contenido y procesar la información del documento.
 
 ---
 
@@ -38,6 +39,54 @@
     go mod download
     ```
 
+---
+
+## Puesta en marcha
+
+Existen varias formas de ejecutar el programa:
+
+#### Go build
+
+Go build es una herramienta de línea de comandos utilizada para compilar programas Go. Compila un archivo de código fuente Go y crea un archivo binario ejecutable.
+
+La herramienta Go build determina automáticamente las dependencias del paquete Go y también las compila. La herramienta de compilación Go puede utilizarse para compilar un único paquete o un proyecto completo.
+
+Se puede ejecutar usando:
+
+```
+go build main.go
+```
+
+También se pueden usar los comandos del makefile como:
+
+```
+make build: construirá un ejecutable para cada sistema operativo
+
+make build-darwin: construye un ejecutable para Mac
+
+make build-linux: construye un ejecutable para Linux
+
+make build-windows: construye un ejecutable para Windows
+```
+
+#### Go run
+
+La herramienta de ejecución Go es una utilidad integrada en la línea de comandos que permite compilar y ejecutar código Go de forma rápida y sencilla, sin la necesidad de crear un ejecutable.
+
+Se puede ejecutar usando:
+
+```bash
+go run main.go
+```
+
+También se puede utilizar el siguiente comando del makefile:
+
+```bash
+make run
+```
+
+---
+
 ### Paquetes y Herramientas Instalados    
 1. [viper](https://github.com/spf13/viper): Librería de configuración flexible que simplifica el manejo de la configuración de la aplicación con soporte para diversos formatos y fuentes.
 
@@ -49,9 +98,12 @@
 
 4. [Fiber](https://docs.gofiber.io): Framework web para Go que facilita la construcción de aplicaciones web y APIs de manera eficiente.
 
+5. [jwt-go](https://github.com/golang-jwt/jwt):  La biblioteca jwt-go en Go facilita la creación, firma y verificación de JWT. 
+
 ---
 
 ## Endpoints
 | Descripción                         | Metodo HTTP   | Ruta                       | Estatus  |
 |-------------------------------------|---------------|----------------------------|----------|
 | Subida de archivo de operaciones    | Post          | /api/upload                | &#x2705; | 
+| Autenticación de usuario            | Post          | /api/login                 | &#x2705; | 
