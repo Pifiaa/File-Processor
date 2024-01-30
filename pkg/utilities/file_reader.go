@@ -1,17 +1,25 @@
 package utilities
 
 import (
+	"errors"
 	"io"
 	"log"
 	"mime/multipart"
+	"path/filepath"
 )
 
 // file_reader abre un archivo y devuelve su contenido.
 func File_reader(file *multipart.FileHeader) ([]byte, error) {
+	// Obtener la extensión del archivo
+	ext := filepath.Ext(file.Filename)
+
+	// Verificar si la extensión es .json
+	if ext != ".json" {
+		return nil, errors.New("el archivo no es de tipo .json")
+	}
+
 	// Abrir el archivo
 	fileContent, err := file.Open()
-
-	//TODO: Validar tipo de archivo
 
 	if err != nil {
 		log.Fatal(err)

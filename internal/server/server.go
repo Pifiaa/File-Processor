@@ -18,7 +18,7 @@ func SetupServer(config *config.Config, db *gorm.DB) (*fiber.App, error) {
 		return nil, fmt.Errorf("error al crear la instancia de Fiber")
 	}
 
-	routes.SetupRoutes(app, db)
+	routes.SetupRoutes(app, db, config)
 
 	port := fmt.Sprintf(":%s", config.Server.Port)
 

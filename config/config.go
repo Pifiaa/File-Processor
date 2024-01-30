@@ -10,6 +10,7 @@ type (
 	Config struct {
 		Server Server
 		DB     DB
+		Token  Token
 	}
 
 	Server struct {
@@ -23,6 +24,10 @@ type (
 		User     string `mapstructure:"User"`
 		Password string `mapstructure:"Password"`
 		Name     string `mapstructure:"Name"`
+	}
+
+	Token struct {
+		Key string `mapstructure:"Key"`
 	}
 )
 

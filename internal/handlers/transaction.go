@@ -5,93 +5,96 @@ import (
 	"File-Processor/pkg/utilities"
 	"encoding/json"
 	"fmt"
-	"log"
-	"sync"
+	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
-const (
-	// Número de workers para procesamiento de gouroutines
-	numWorkers int = 10
+// Response estructura para las respuestas
+type Response struct {
+	Message string `json:"message"`
+	Error   string `json:"error,omitempty"`
+}
 
-	// Tamaño del lote para procesamiento
-	batchSize int = 150
-)
-
+// GetTransactions maneja la carga y procesamiento de transacciones
 func GetTransactions(db *gorm.DB, c *fiber.Ctx) error {
+	//Obtiene el archivo
 	FormFile, err := c.FormFile("file")
 	if err != nil {
-		log.Fatal(err)
+		return handleError(c, http.StatusBadRequest, fmt.Sprintf("Error al obtener el archivo: %s", err.Error()))
 	}
 
+	//Leer contenido del archivo
 	fileContent, err := utilities.File_reader(FormFile)
 	if err != nil {
-		log.Fatal(err)
+		return handleError(c, http.StatusInternalServerError, fmt.Sprintf("Error al leer el archivo: %s", err.Error()))
 	}
 
+	//Decodifica contenido del archivo
 	var transactions []models.Invoicings
 	err = json.Unmarshal(fileContent, &transactions)
 	if err != nil {
-		log.Fatal(err)
+		return handleError(c, http.StatusInternalServerError, fmt.Sprintf("Error al decodificar el archivo JSON: %s", err.Error()))
 	}
 
-	processTransactions(transactions, db)
+	//Procesa las transacciones
+	err = processTransactions(transactions, db)
+	if err != nil {
+		return handleError(c, http.StatusInternalServerError, fmt.Sprintf("Error al procesar las transacciones: %s", err.Error()))
+	}
 
-	return nil
+	return c.JSON(Response{Message: "Transacciones procesadas correctamente"})
 }
 
-func processTransactions(transactions []models.Invoicings, db *gorm.DB) {
-	var wg sync.WaitGroup
-	errChan := make(chan error)
-	stopChan := make(chan struct{}) // Canal para detener la ejecución de goroutines
+func processTransactions(transactions []models.Invoicings, db *gorm.DB) error {
+	//Tamaño del lote para procesamiento
+	batchSize := 700
+	//Calcula cantidad de lotes
+	batchCount := (len(transactions) + batchSize - 1) / batchSize
 
-	for i := 0; i < len(transactions); i += batchSize {
-		end := i + batchSize
+	var transactionGroup errgroup.Group
+
+	//Procesa cada lote
+	for i := 0; i < batchCount; i++ {
+		start := i * batchSize
+		end := (i + 1) * batchSize
 		if end > len(transactions) {
 			end = len(transactions)
 		}
 
-		wg.Add(1)
-		go func(start, end int) {
-			defer wg.Done()
-			for j := start; j < end; j++ {
-				transaction := transactions[j]
-
-				if err := db.Create(&transaction).Error; err != nil {
-					log.Printf("Error al insertar la transacción en la base de datos: %v", err)
-					errChan <- err
-					// Enviar señal para detener otras goroutines
-					stopChan <- struct{}{}
-					return
+		transactionGroup.Go(func() error {
+			//Inicia transacción de base de datos
+			databaseTransaction := db.Begin()
+			defer func() {
+				if r := recover(); r != nil {
+					databaseTransaction.Rollback()
 				}
-				//TODO: Operación sobre los datos
-				//TODO: Enviar datos a la api de konecta
+			}()
+
+			//Inserta transacciones
+			for _, transaction := range transactions[start:end] {
+				if err := databaseTransaction.Create(&transaction).Error; err != nil {
+					databaseTransaction.Rollback()
+					return fmt.Errorf("error al insertar la transacción en la base de datos: %w", err)
+				}
+				// TODO: Operación sobre los datos
+				//TODO: Enviar datos a la API de Konecta
 			}
-		}(i, end)
+			return databaseTransaction.Commit().Error
+		})
 	}
 
-	//TODO: Mensaje de aviso
-	fmt.Print("Transacciones procesadas")
+	//Espera a que se completen todas las transacciones
+	if err := transactionGroup.Wait(); err != nil {
+		return err
+	}
 
-	// Monitorear errores
-	go func() {
-		for err := range errChan {
-			// Manejar el error como desees
-			log.Printf("Error encontrado: %v", err)
-		}
-		// Cerrar el canal de detención cuando no hay más errores
-		close(stopChan)
-	}()
+	return nil
+}
 
-	go func() {
-		// Esperar a que todas las goroutines terminen
-		wg.Wait()
-		// Cerrar el canal de errores después de que todas las goroutines terminen
-		close(errChan)
-	}()
-
-	// Esperar hasta que se cierre el canal de detención
-	<-stopChan
+// handleError maneja los errores y envía una respuesta JSON
+func handleError(c *fiber.Ctx, status int, errorMessage string) error {
+	return c.Status(status).JSON(Response{Error: errorMessage})
 }

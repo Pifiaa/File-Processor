@@ -8,3 +8,6 @@ db:
   user: root
   password: 
   name: aynn-invoicings
+
+token:
+  key: aynn
