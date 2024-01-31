@@ -15,6 +15,4 @@ func main() {
 
 	// Crear una nueva instancia de la aplicación y la inicializa
 	app.Initialize(config)
-
-	//TODO: Documentación del programa y la api
 }

@@ -19,7 +19,7 @@ CMD_DIR=./cmd
 MIGRATION_DIR=./internal/migrations
 
 # Archivo principal
-MAIN_FILE=file-processor.go
+MAIN_FILE=main.go
 
 # Comandos de compilación
 # Este comando se utiliza para construir el ejecutable para una plataforma específica.
